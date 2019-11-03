@@ -38,7 +38,7 @@ const game = new Phaser.Game(config);
 
 function preload() {
     this.load.image('paddle', 'img/paddle.png');
-    this.load.image('emoji', 'img/emoji.png');
+    this.load.image('brick', 'img/brick.png');
     this.load.image('destroyed', 'img/destroyed.png');
     this.load.image('ball', 'img/ball.png');
 }
@@ -57,7 +57,7 @@ function create() {
         .setBounce(1);
 
     bricks = this.physics.add.staticGroup({
-        key: 'emoji',
+        key: 'brick',
         frameQuantity: 20,
         gridAlign: { width: 10, cellWidth: 60, cellHeight: 60, x: this.cameras.main.centerX - 280, y: 100 }
     });
