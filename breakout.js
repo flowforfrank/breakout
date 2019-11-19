@@ -20,11 +20,17 @@ const config = {
     type: Phaser.AUTO,
     width: window.innerWidth,
     height: window.innerHeight,
+    backgroundColor: '#222',
     physics: {
         default: 'arcade',
         arcade: {
             // debug: true,
-            gravity: { y: 0 }
+            checkCollision: {
+                up: true,
+                down: false,
+                left: true,
+                right: true
+            }
         }
     },
     scene: {
@@ -44,40 +50,35 @@ function preload() {
 }
 
 function create() {
-    this.physics.world.setBoundsCollision(true, true, true, false);
-    this.cameras.main.setBackgroundColor('#222');
-
     paddle = this.physics.add.image(this.cameras.main.centerX, this.game.config.height - 50, 'paddle')
-        .setOrigin(0.5)
-        .setImmovable();
+       .setImmovable();
 
     ball = this.physics.add.image(this.cameras.main.centerX, this.game.config.height - 100, 'ball')
-        .setOrigin(0.5)
         .setCollideWorldBounds(true)
         .setBounce(1);
 
     bricks = this.physics.add.staticGroup({
         key: 'brick',
         frameQuantity: 20,
-        gridAlign: { width: 10, cellWidth: 60, cellHeight: 60, x: this.cameras.main.centerX - 280, y: 100 }
+        gridAlign: { width: 10, cellWidth: 60, cellHeight: 60, x: this.cameras.main.centerX - 277.5, y: 100 }
     });
 
     scoreText = this.add.text(20, 20, 'Score: 0', textStyle);
     livesText = this.add.text(this.game.config.width - 20, 20, 'Lives: '+lives, textStyle).setOrigin(1, 0);
     
-    gameOverText = this.add.text(this.game.config.width * 0.5, this.game.config.height *0.5, 'Game over!', textStyle)
+    gameOverText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'Game over!', textStyle)
         .setOrigin(0.5)
         .setPadding(10)
         .setStyle({ backgroundColor: '#111', fill: '#e74c3c' })
         .setVisible(false);
 
-    wonTheGameText = this.add.text(this.game.config.width * 0.5, this.game.config.height *0.5, 'You won the game!', textStyle)
+    wonTheGameText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'You won the game!', textStyle)
         .setOrigin(0.5)
         .setPadding(10)
         .setStyle({ backgroundColor: '#111', fill: '#27ae60' })
         .setVisible(false);
 
-    startButton = this.add.text(this.game.config.width * 0.5, this.game.config.height *0.5, 'Start game', textStyle)
+    startButton = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'Start game', textStyle)
         .setOrigin(0.5)
         .setPadding(10)
         .setStyle({ backgroundColor: '#111' })
@@ -86,8 +87,8 @@ function create() {
         .on('pointerover', () => startButton.setStyle({ fill: '#f39c12' }))
         .on('pointerout', () => startButton.setStyle({ fill: '#FFF' }));
 
-    this.physics.add.collider(ball, bricks, hitBrick, null, this);
-    this.physics.add.collider(ball, paddle, hitPaddle, null, this);
+    this.physics.add.collider(ball, bricks, brickHit, null, this);
+    this.physics.add.collider(ball, paddle, paddleHit, null, this);
 }
 
 function update() {
@@ -112,7 +113,7 @@ function update() {
 }
 
 
-function hitPaddle(ball, paddle) {
+function paddleHit(ball, paddle) {
     var diff = 0;
 
     if (ball.x < paddle.x) {
@@ -128,7 +129,7 @@ function hitPaddle(ball, paddle) {
     }
 }
 
-function hitBrick(ball, brick) {
+function brickHit(ball, brick) {
     brick.setTexture('destroyed');
    
     score += 5;
@@ -155,11 +156,11 @@ function hitBrick(ball, brick) {
 }
 
 function startGame() {
-    this.input.on('pointermove', pointer => {
-        paddle.x = Phaser.Math.Clamp(pointer.x, paddle.width / 2, this.game.config.width - paddle.width / 2);
-    }, this);
-
     startButton.destroy();
     ball.setVelocity(-300, -150);
     rotation = 'left';
+
+    this.input.on('pointermove', pointer => {
+        paddle.x = Phaser.Math.Clamp(pointer.x, paddle.width / 2, this.game.config.width - paddle.width / 2);
+    });
 }
